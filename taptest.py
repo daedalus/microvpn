@@ -12,31 +12,24 @@ PORT = int(sys.argv[3])
 if AESMODE:
 	PSK = sys.argv[4]
 
-if mode == 'server':
-	addr = "10.8.0.1"
-else:
-	addr = "10.8.0.2"
-
+addr = "10.8.0.1" if mode == 'server' else "10.8.0.2"
 BLOCK_SIZE=16
 
-pad = lambda s: s + (BLOCK_SIZE - len(s) % BLOCK_SIZE) * chr(BLOCK_SIZE - len(s) % BLOCK_SIZE) 
-unpad = lambda s : s[0:-ord(s[-1])]
+pad = lambda s: s + (BLOCK_SIZE - len(s) % BLOCK_SIZE) * chr(BLOCK_SIZE - len(s) % BLOCK_SIZE)
+unpad = lambda s: s[:-ord(s[-1])]
 
  # AES encryption: (plaintext -> decrypted)
 def encrypt(message, passphrase):
-    # passphrase MUST be 16, 24 or 32 bytes long, how can I do that ?
-    #IV = Random.new().read(BLOCK_SIZE)
-    aes = AES.new(passphrase, AES.MODE_CFB, IV)
-    return base64.b64encode(IV) + " " +  base64.b64encode(aes.encrypt(message))
+	# passphrase MUST be 16, 24 or 32 bytes long, how can I do that ?
+	#IV = Random.new().read(BLOCK_SIZE)
+	aes = AES.new(passphrase, AES.MODE_CFB, IV)
+	return f"{base64.b64encode(IV)} {base64.b64encode(aes.encrypt(message))}"
 
  # AES decryption (crypted -> plaintext)
 def decrypt(encrypted, passphrase, IV = None):
-    if IV == None:
-        IV = Random.new().read(BLOCK_SIZE)
-    else:
-        IV = base64.b64decode(IV)
-    aes = AES.new(passphrase, AES.MODE_CFB, IV)
-    return aes.decrypt(base64.b64decode(encrypted))
+	IV = Random.new().read(BLOCK_SIZE) if IV is None else base64.b64decode(IV)
+	aes = AES.new(passphrase, AES.MODE_CFB, IV)
+	return aes.decrypt(base64.b64decode(encrypted))
 
 def setup_tap(addr,netmask):
 	tap = TunTapDevice(flags=IFF_TAP)
@@ -59,8 +52,8 @@ def setup_socket(mode,HOST,PORT):
 		s.listen(1)
 		#s.setblocking(0)
 		#conn,addr = s.accept()
-                conn = None
-		while conn == None:
+		conn = None
+		while conn is None:
 			conn, addr = s.accept()
 		return conn
 	else:

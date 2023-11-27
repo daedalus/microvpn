@@ -16,14 +16,11 @@ MTU=9500
 
 if AESMODE:
 	PSK = sys.argv[4]
-if mode == 'server':
-	addr = "10.8.0.1"
-else:
-	addr = "10.8.0.2"
+addr = "10.8.0.1" if mode == 'server' else "10.8.0.2"
 BLOCK_SIZE=16
 
-pad = lambda s: s + (BLOCK_SIZE - len(s) % BLOCK_SIZE) * chr(BLOCK_SIZE - len(s) % BLOCK_SIZE) 
-unpad = lambda s : s[0:-ord(s[-1])]
+pad = lambda s: s + (BLOCK_SIZE - len(s) % BLOCK_SIZE) * chr(BLOCK_SIZE - len(s) % BLOCK_SIZE)
+unpad = lambda s: s[:-ord(s[-1])]
 
 #aes = AES.new(passphrase, AES.MODE_CFB, IV)
 aes = AES.new(PSK, AES.MODE_ECB)
@@ -106,10 +103,7 @@ def main_loop(tap,conn):
 	iteration=0
 	l2 = 0
 	l3 = 0
-	if mode != "server":
-		addr = (HOST,PORT)
-	else:
-		addr = None
+	addr = (HOST, PORT) if mode != "server" else None
 	while True:
 
 		buf = tap.read(tap.mtu)
